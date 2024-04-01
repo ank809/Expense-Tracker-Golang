@@ -10,6 +10,7 @@ func main() {
 
 	router.GET("/", HomeScreen)
 	router.GET("/signup", controllers.Signup)
+	router.GET("/login", controllers.LoginUser)
 	router.Run(":8081")
 }
 
