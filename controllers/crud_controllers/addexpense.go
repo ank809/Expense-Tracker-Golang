@@ -15,14 +15,20 @@ func AddExpense(c *gin.Context) {
 	var expense models.Data
 
 	if err := c.BindJSON(&expense); err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	expense.ID = primitive.NewObjectID()
-	expense.DateTime = primitive.DateTime(time.Now().Unix())
 
-	collection_name := "expenses"
-	collection := database.OpenCollection(database.Client, collection_name)
-	collection.InsertOne(context.Background(), expense)
-	c.JSON(200, "Expense Successfully Saved")
+	expense.DateTime = primitive.DateTime(time.Now().Unix())
+	expense.ID = primitive.NewObjectID()
+
+	collectionName := "expenses"
+	collection := database.OpenCollection(database.Client, collectionName)
+	_, err := collection.InsertOne(context.Background(), expense)
+	if err != nil {
+		c.JSON(400, "Error in saving data")
+		return
+	}
+	c.JSON(200, "Document saved successfully")
+
 }

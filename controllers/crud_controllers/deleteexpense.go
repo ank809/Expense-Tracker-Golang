@@ -31,4 +31,10 @@ func DeleteExpense(c *gin.Context) {
 		return
 	}
 	c.JSON(200, "Document deleted successfully")
+	// if err := collection.FindOneAndDelete(context.Background(), filter); err != nil {
+	// 	c.JSON(400, err)
+	// 	return
+	// }
+	// c.JSON(200, "Deleted successfuly")
+
 }

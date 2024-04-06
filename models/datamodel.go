@@ -1,13 +1,12 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Data struct {
-	ID                primitive.ObjectID `bson:"_id"`
-	Title             string             `json:"title"`
-	Description       string             `json:"description"`
-	TotalAmount       int                `json:"totalamount"`
-	InceremtedAmount  int                `json:"incrementedamount"`
-	DecrementedAmount int                `json:"decrementedamount"`
-	DateTime          primitive.DateTime `json:"date_time"`
+	ID          primitive.ObjectID `bson:"_id"`
+	TotalAmount int                `json:"totalamount"`
+	Expenses    []int              `json:"expense"`
+	DateTime    primitive.DateTime `json:"date_time"`
 }

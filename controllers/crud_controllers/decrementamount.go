@@ -2,7 +2,7 @@ package crud_controllers
 
 import (
 	"context"
-	"time"
+	"strconv"
 
 	"github.com/ank809/Expense-Tracker-Golang/database"
 	"github.com/ank809/Expense-Tracker-Golang/models"
@@ -13,41 +13,33 @@ import (
 
 func DecrementAmount(c *gin.Context) {
 	var expense models.Data
-	if err := c.BindJSON(&expense); err != nil {
-		c.JSON(400, err)
-		return
-	}
-	var foundExpenses models.Data
-	id := c.Param("id")
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		c.JSON(400, "Invalid id")
-		return
-	}
-	filter := bson.M{"_id": objectID}
 	collection_name := "expenses"
 	collection := database.OpenCollection(database.Client, collection_name)
-	err = collection.FindOne(context.Background(), filter).Decode(&foundExpenses)
+	id := c.Param("id")
+	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(400, err)
+		c.JSON(400, "Invalid Id")
+		return
+	}
+	filter := bson.M{"_id": objectId}
+
+	if err := collection.FindOne(context.Background(), filter).Decode(&expense); err != nil {
+		c.JSON(400, err.Error())
 		return
 	}
 
-	foundExpenses.DecrementedAmount = expense.DecrementedAmount
-	foundExpenses.TotalAmount = foundExpenses.TotalAmount - foundExpenses.DecrementedAmount
-	foundExpenses.DateTime = primitive.DateTime(time.Now().Unix())
-
-	update := bson.M{"$set": foundExpenses}
-	count, err := collection.UpdateOne(context.Background(), filter, update)
-
+	value := c.Query("value")
+	amount, err := strconv.Atoi(value)
 	if err != nil {
-		c.JSON(400, err)
+		c.JSON(400, err.Error())
 		return
 	}
-	if count.MatchedCount == 0 {
-		c.JSON(400, "Document Not found")
-		return
+	expense.TotalAmount -= amount
+	expense.Expenses = append(expense.Expenses, amount)
+	update := bson.M{"$set": bson.M{"totalamount": expense.TotalAmount, "expenses": expense.Expenses}}
+	_, err = collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		c.JSON(400, err.Error())
 	}
-	c.JSON(200, "Document updated successfully")
-
+	c.JSON(200, "Document updated")
 }

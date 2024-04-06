@@ -15,7 +15,7 @@ func main() {
 	router.GET("/addexpense", crud_controllers.AddExpense)
 	router.GET("/delete/:id", crud_controllers.DeleteExpense)
 	router.GET("allexpenses", crud_controllers.GetAllExpenses)
-	router.GET("increment/:id", crud_controllers.InceremteAmount)
+	router.GET("increment/:id", crud_controllers.IncrementAmount)
 	router.GET("decrement/:id", crud_controllers.DecrementAmount)
 	router.Run(":8081")
 }
