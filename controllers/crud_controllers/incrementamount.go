@@ -2,16 +2,50 @@ package crud_controllers
 
 import (
 	"context"
+	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/ank809/Expense-Tracker-Golang/database"
 	"github.com/ank809/Expense-Tracker-Golang/models"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func IncrementAmount(c *gin.Context) {
+	if err := godotenv.Load(); err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+	jwt_key := []byte(os.Getenv("JWT_SECRETKEY"))
+	cookie, err := c.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			c.JSON(http.StatusUnauthorized, "No cookie found")
+			return
+		}
+		c.JSON(400, err.Error())
+		return
+	}
+	claims := &models.Claims{}
+	tokenstring := cookie
+	token, err := jwt.ParseWithClaims(tokenstring, claims, func(t *jwt.Token) (interface{}, error) {
+		return jwt_key, err
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(400, err.Error())
+			return
+		}
+		c.JSON(400, err.Error())
+		return
+	}
+	if !token.Valid {
+		c.JSON(400, "Invalid token")
+	}
 	var expense models.Data
 	id := c.Param("id")
 	objectId, err := primitive.ObjectIDFromHex(id)

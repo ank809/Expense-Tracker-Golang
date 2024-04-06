@@ -20,7 +20,7 @@ func LoginUser(c *gin.Context) {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println(err)
 	}
-	jwt_key := []byte(os.Getenv("JWT_SECRET_KEY"))
+	jwt_key := []byte(os.Getenv("JWT_SECRETKEY"))
 	var user models.User
 
 	var foundUser models.User
@@ -34,7 +34,7 @@ func LoginUser(c *gin.Context) {
 	filter := bson.M{"username": user.Username}
 	collection.FindOne(context.Background(), filter).Decode(&foundUser)
 	expected_password := foundUser.Password
-
+	expiration_time := time.Now().Add(time.Minute * 5)
 	err := bcrypt.CompareHashAndPassword([]byte(expected_password), []byte(user.Password))
 	if err != nil {
 		fmt.Println(expected_password)
@@ -43,7 +43,7 @@ func LoginUser(c *gin.Context) {
 		return
 
 	}
-	expiration_time := time.Now().Add(time.Second * 5)
+
 	claims := &models.Claims{
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{

@@ -2,16 +2,52 @@ package crud_controllers
 
 import (
 	"context"
+	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/ank809/Expense-Tracker-Golang/database"
 	"github.com/ank809/Expense-Tracker-Golang/models"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/mgo.v2/bson"
 )
 
 func DecrementAmount(c *gin.Context) {
+	if err := godotenv.Load(); err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+	jwt_key := []byte(os.Getenv("JWT_SECRETKEY"))
+
+	cookie, err := c.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			c.JSON(http.StatusUnauthorized, "No cookie found")
+			return
+		}
+		c.JSON(400, err.Error())
+		return
+	}
+	tokenstring := cookie
+	claims := &models.Claims{}
+	token, err := jwt.ParseWithClaims(tokenstring, claims, func(t *jwt.Token) (interface{}, error) {
+		return jwt_key, err
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(http.StatusUnauthorized, err)
+			return
+		}
+		c.JSON(400, err.Error())
+		return
+	}
+	if !token.Valid {
+		c.JSON(http.StatusBadRequest, "Invalid token")
+		return
+	}
 	var expense models.Data
 	collection_name := "expenses"
 	collection := database.OpenCollection(database.Client, collection_name)
