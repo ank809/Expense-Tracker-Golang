@@ -14,6 +14,7 @@ type User struct {
 }
 
 type Claims struct {
-	Username string `json:"username"`
+	Username string             `json:"username"`
+	UserId   primitive.ObjectID `json:"userid"`
 	jwt.StandardClaims
 }

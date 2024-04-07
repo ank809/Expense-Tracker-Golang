@@ -57,7 +57,8 @@ func AddExpense(c *gin.Context) {
 	}
 
 	expense.DateTime = primitive.DateTime(time.Now().Unix())
-	expense.ID = primitive.NewObjectID()
+	expense.ID = claims.UserId
+	expense.Username = claims.Username
 
 	collectionName := "expenses"
 	collection := database.OpenCollection(database.Client, collectionName)

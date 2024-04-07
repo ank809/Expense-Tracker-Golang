@@ -11,6 +11,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func GetAllExpenses(c *gin.Context) {
@@ -48,8 +49,9 @@ func GetAllExpenses(c *gin.Context) {
 	var expenses []models.Data
 
 	collection_name := "expenses"
+	filter := bson.M{"username": claims.Username}
 	collection := database.OpenCollection(database.Client, collection_name)
-	expenseCursor, err := collection.Find(context.Background(), collection)
+	expenseCursor, err := collection.Find(context.Background(), filter)
 	if err != nil {
 		c.JSON(400, err.Error())
 		return

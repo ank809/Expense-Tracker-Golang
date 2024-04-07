@@ -12,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -46,6 +47,7 @@ func LoginUser(c *gin.Context) {
 
 	claims := &models.Claims{
 		Username: user.Username,
+		UserId:   primitive.NewObjectID(),
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiration_time.Unix(),
 		},
